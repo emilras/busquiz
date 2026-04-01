@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fodboldquiz – Skødstrup SF</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+  :root{--green:#1a6b3a;--green-l:#2d8f52;--gold:#d4a017;--gold-l:#f0c040;--dark:#0f1a14;--white:#ffffff;--orange:#c0600a;--r:10px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Serif 4',Georgia,serif;background:var(--dark);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+  /* ── SETUP ── */
+  #setup-screen{width:100%;max-width:520px;padding:1.5rem 1.25rem 3rem;display:flex;flex-direction:column;gap:1.1rem;}
+  .logo{text-align:center;padding:1rem 0 0;}
+  .logo h1{font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700;color:var(--gold-l);letter-spacing:2px;text-transform:uppercase;}
+  .logo p{font-size:.85rem;color:#8aab96;margin-top:4px;font-style:italic;}
+  .scard{background:#1a2e22;border:1px solid #2d4a38;border-radius:var(--r);padding:1rem;}
+  .scard h2{font-family:'Oswald',sans-serif;font-size:.82rem;font-weight:600;color:var(--gold-l);text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem;}
+  .num-btns{display:flex;gap:6px;}
+  .num-btn{flex:1;padding:9px 4px;background:#0f1a14;border:1px solid #2d4a38;border-radius:6px;color:#8aab96;font-family:'Oswald',sans-serif;font-size:1rem;cursor:pointer;transition:all .15s;}
+  .num-btn.active,.num-btn:hover{background:var(--green);border-color:var(--green-l);color:var(--white);}
+  .team-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+  .team-row:last-child{margin-bottom:0;}
+  .team-row input{flex:1;padding:8px 10px;background:#0f1a14;border:1px solid #2d4a38;border-radius:6px;color:var(--white);font-size:.9rem;font-family:inherit;}
+  .team-row input::placeholder{color:#5a7060;}
+  .team-row input:focus{outline:none;border-color:var(--gold);}
+  .mode-grid{display:flex;gap:8px;}
+  .mode-btn{flex:1;padding:10px 6px;border-radius:6px;border:1px solid #2d4a38;background:#0f1a14;color:#8aab96;font-family:'Oswald',sans-serif;font-size:.82rem;text-align:center;cursor:pointer;transition:all .15s;line-height:1.3;}
+  .mode-btn .mi{font-size:1.3rem;display:block;margin-bottom:3px;}
+  .mode-btn.active{border-color:var(--gold);background:#1e3328;color:var(--gold-l);}
+  .mode-note{font-size:.76rem;color:#6a8a74;margin-top:8px;font-style:italic;line-height:1.4;}
+  .start-btn{width:100%;padding:14px;background:var(--gold);border:none;border-radius:var(--r);color:var(--dark);font-family:'Oswald',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+  .start-btn:hover{background:var(--gold-l);}
+  .test-start-btn{width:100%;padding:12px;background:transparent;border:1px solid var(--orange);border-radius:var(--r);color:#e8943a;font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+  .test-start-btn:hover{background:#2a1a0a;}
+  .resume-banner{background:#1e3328;border:1px solid var(--gold);border-radius:var(--r);padding:.9rem 1rem;display:flex;flex-direction:column;gap:.6rem;}
+  .resume-banner p{font-size:.85rem;color:#c5e8d4;line-height:1.5;}
+  .resume-banner strong{color:var(--gold-l);}
+  .resume-row{display:flex;gap:8px;}
+  .resume-btn{flex:1;padding:10px;background:var(--gold);border:none;border-radius:6px;color:var(--dark);font-family:'Oswald',sans-serif;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;}
+  .resume-btn:hover{background:var(--gold-l);}
+  .discard-btn{flex:1;padding:10px;background:transparent;border:1px solid #c08080;border-radius:6px;color:#c08080;font-family:'Oswald',sans-serif;font-size:.88rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;}
+  .discard-btn:hover{background:#2a1a1a;}
+  .qs-info{font-size:.78rem;color:#6a8a74;text-align:center;font-style:italic;line-height:1.5;}
+
+  /* ── GAME ── */
+  #game-screen{width:100%;max-width:600px;padding:.75rem 1rem 3rem;display:none;flex-direction:column;gap:.8rem;}
+
+  /* Round progress bar */
+  .round-bar{background:#1a2e22;border:1px solid #2d4a38;border-radius:8px;padding:.6rem .9rem;display:flex;flex-direction:column;gap:.35rem;}
+  .round-bar-top{display:flex;justify-content:space-between;align-items:center;}
+  .round-label{font-family:'Oswald',sans-serif;font-size:.75rem;color:var(--gold-l);text-transform:uppercase;letter-spacing:1px;}
+  .round-dots{display:flex;gap:5px;}
+  .rd{width:22px;height:8px;border-radius:4px;background:#0f1a14;border:1px solid #2d4a38;transition:background .2s;}
+  .rd.done{background:var(--green);border-color:var(--green-l);}
+  .rd.active{background:var(--gold);border-color:var(--gold-l);}
+  .progress-track{height:4px;background:#0f1a14;border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0;}
+  .q-counter{font-family:'Oswald',sans-serif;font-size:.78rem;color:#8aab96;text-transform:uppercase;letter-spacing:1px;}
+  .cat-badge{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 9px;border-radius:20px;background:#1a2e22;border:1px solid #2d4a38;color:var(--gold-l);}
+  .mode-ind{font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 9px;border-radius:20px;}
+  .mode-ind.live{background:#0a1f14;border:1px solid var(--green);color:#5fd48a;}
+  .mode-ind.test{background:#2a1a0a;border:1px solid var(--orange);color:#e8943a;}
+  .top-actions{display:flex;gap:6px;align-items:center;}
+  .top-icon-btn{padding:5px 10px;background:transparent;border:1px solid #2d4a38;border-radius:6px;color:#8aab96;font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .top-icon-btn:hover{border-color:#5a7060;color:var(--white);}
+  .top-icon-btn.danger{border-color:#7a3030;color:#c08080;}
+  .top-icon-btn.danger:hover{background:#2a1a1a;border-color:#c08080;}
+
+  .scoreboard{display:flex;gap:5px;flex-wrap:nowrap;}
+  .sc{flex:1;min-width:0;background:#1a2e22;border:1px solid #2d4a38;border-radius:8px;padding:6px 4px;text-align:center;transition:border-color .2s,background .2s;}
+  .sc.reader{border-color:#3a5e9a;background:#192840;}
+  .sc.answerer{border-color:var(--gold);background:#1e3328;}
+  .sc .sn{font-size:.58rem;color:#8aab96;text-transform:uppercase;letter-spacing:.3px;font-family:'Oswald',sans-serif;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sc .sp{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);line-height:1;}
+  .sc.reader .sp{color:#7ab0f0;}
+  .sc.answerer .sp{color:var(--gold-l);}
+  .sc .role-tag{font-family:'Oswald',sans-serif;font-size:.55rem;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;height:10px;}
+  .sc.reader .role-tag{color:#5a8abf;}
+  .sc.answerer .role-tag{color:#a08030;}
+
+  .q-card{background:#1a2e22;border:1px solid #2d4a38;border-radius:var(--r);padding:1rem;}
+  .roles-line{font-size:.72rem;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;gap:8px;flex-wrap:wrap;}
+  .rl-badge{padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:600;}
+  .rl-badge.reader-b{background:#192840;border:1px solid #3a5e9a;color:#7ab0f0;}
+  .rl-badge.ans-b{background:#1e3328;border:1px solid var(--gold);color:var(--gold-l);}
+  .q-text{font-size:1.18rem;line-height:1.5;color:var(--white);font-weight:600;}
+
+  .ans-area{background:#1a2e22;border:1px solid #2d4a38;border-radius:var(--r);overflow:hidden;}
+  .reveal-btn{width:100%;padding:14px;background:transparent;border:none;color:#8aab96;font-family:'Oswald',sans-serif;font-size:.92rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .reveal-btn:hover{color:var(--white);background:#1e3328;}
+  .ans-inner{padding:.85rem 1rem;display:none;}
+  .ans-lbl{font-size:.68rem;color:#8aab96;text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif;margin-bottom:4px;}
+  .ans-txt{font-size:1.2rem;font-weight:600;color:var(--gold-l);}
+  .blur-row{display:flex;align-items:center;gap:10px;}
+  .blur-ans{font-size:1.2rem;font-weight:600;color:var(--gold-l);filter:blur(7px);user-select:none;transition:filter .3s;flex:1;}
+  .blur-ans.show{filter:blur(0);}
+  .peek-btn{padding:6px 11px;background:#2a1a0a;border:1px solid var(--orange);border-radius:6px;color:#e8943a;font-family:'Oswald',sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .peek-btn:hover{background:#3a2a1a;}
+
+  .score-sec{display:none;flex-direction:column;gap:6px;}
+  .score-sec-lbl{font-size:.7rem;color:#8aab96;text-transform:uppercase;letter-spacing:1px;font-family:'Oswald',sans-serif;}
+  .score-row{display:flex;gap:5px;align-items:center;}
+  .tlbl{flex:1;min-width:0;padding:8px 7px;background:#0f1a14;border:1px solid #2d4a38;border-radius:6px;color:var(--white);font-family:'Oswald',sans-serif;font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tlbl.is-reader{border-color:#3a5e9a;color:#7ab0f0;}
+  .pb{padding:8px 10px;border:none;border-radius:6px;font-family:'Oswald',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .1s;}
+  .pb:active{transform:scale(.95);}
+  .pb.selected{outline:3px solid var(--white);outline-offset:2px;}
+  .p2{background:var(--green);color:var(--white);}
+  .p2:hover{background:var(--green-l);}
+  .p1{background:#2d4a38;color:#c5e8d4;}
+  .p1:hover{background:#3a5e48;}
+  .p0{background:#2a1a1a;color:#c08080;}
+  .p0:hover{background:#3a2020;}
+  .reader-note{font-size:.72rem;color:#5a8abf;font-style:italic;padding:6px 0 0;}
+
+  .awarded-bar{background:#0f1a14;border:1px solid #2d4a38;border-radius:8px;padding:.7rem 1rem;display:none;align-items:center;justify-content:space-between;gap:8px;}
+  .awarded-bar .aw-txt{flex:1;font-family:'Oswald',sans-serif;font-size:.82rem;color:#c5e8d4;}
+  .aw-undo{padding:5px 12px;background:transparent;border:1px solid #7a3030;border-radius:6px;color:#c08080;font-family:'Oswald',sans-serif;font-size:.75rem;cursor:pointer;white-space:nowrap;}
+  .aw-undo:hover{background:#2a1a1a;}
+
+  .nav-row{display:flex;gap:8px;}
+  .next-btn{flex:1;padding:13px;border:none;border-radius:var(--r);color:var(--white);font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:none;}
+  .next-btn.live-c{background:var(--green);}
+  .next-btn.test-c{background:var(--orange);}
+  .next-btn:hover{opacity:.88;}
+  .prev-btn{padding:13px 14px;background:transparent;border:1px solid #2d4a38;border-radius:var(--r);color:#8aab96;font-family:'Oswald',sans-serif;font-size:.88rem;cursor:pointer;display:none;white-space:nowrap;}
+  .prev-btn:hover{border-color:#5a7060;color:var(--white);}
+
+  /* ── BETWEEN ROUNDS ── */
+  #between-screen{width:100%;max-width:500px;padding:2rem 1.5rem;display:none;flex-direction:column;gap:1.1rem;align-items:center;text-align:center;}
+  .between-title{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold-l);text-transform:uppercase;letter-spacing:2px;}
+  .between-round-dots{display:flex;gap:8px;justify-content:center;margin:.3rem 0;}
+  .brd{width:28px;height:10px;border-radius:5px;background:#0f1a14;border:1px solid #2d4a38;}
+  .brd.done{background:var(--green);border-color:var(--green-l);}
+  .brd.next{background:var(--gold);border-color:var(--gold-l);}
+  .between-scores{width:100%;display:flex;flex-direction:column;gap:7px;}
+  .bfr{display:flex;justify-content:space-between;align-items:center;background:#1a2e22;border:1px solid #2d4a38;border-radius:var(--r);padding:10px 14px;}
+  .bfr.leader{border-color:var(--gold);background:#1e3328;}
+  .bfr .bfn{font-family:'Oswald',sans-serif;font-size:1rem;}
+  .bfr .bfp{font-family:'Oswald',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold-l);}
+  .between-info{font-size:.8rem;color:#8aab96;font-style:italic;}
+  .next-round-btn{width:100%;padding:14px;background:var(--gold);border:none;border-radius:var(--r);color:var(--dark);font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+  .next-round-btn:hover{background:var(--gold-l);}
+
+  /* ── END ── */
+  #end-screen{width:100%;max-width:500px;padding:2rem 1.5rem;display:none;flex-direction:column;gap:1.1rem;align-items:center;text-align:center;}
+  #end-screen h2{font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700;color:var(--gold-l);text-transform:uppercase;letter-spacing:2px;}
+  .final-scores{width:100%;display:flex;flex-direction:column;gap:7px;}
+  .fr{display:flex;justify-content:space-between;align-items:center;background:#1a2e22;border:1px solid #2d4a38;border-radius:var(--r);padding:10px 14px;}
+  .fr.win{border-color:var(--gold);background:#1e3328;}
+  .fr .fn{font-family:'Oswald',sans-serif;font-size:1rem;}
+  .fr .fp{font-family:'Oswald',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold-l);}
+  .end-btns{display:flex;gap:8px;width:100%;}
+  .new-game-btn{flex:1;padding:12px;background:var(--green);border:none;border-radius:var(--r);color:var(--white);font-family:'Oswald',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+  .new-game-btn:hover{background:var(--green-l);}
+  .reset-btn{flex:1;padding:12px;background:transparent;border:1px solid #c08080;border-radius:var(--r);color:#c08080;font-family:'Oswald',sans-serif;font-size:.9rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+  .reset-btn:hover{background:#2a1a1a;}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen" style="display:none">
+  <div class="logo">
+    <h1>⚽ Fodboldquiz</h1>
+    <p>Skødstrup SF – Busturen 2026</p>
+  </div>
+  <div class="resume-banner" id="resume-banner" style="display:none">
+    <p id="resume-text">Der er et gemt spil i gang.</p>
+    <div class="resume-row">
+      <button class="resume-btn" onclick="resumeGame()">Fortsæt ▶</button>
+      <button class="discard-btn" onclick="discardSave()">Start forfra</button>
+    </div>
+  </div>
+  <div class="scard">
+    <h2>Tilstand</h2>
+    <div class="mode-grid">
+      <div class="mode-btn active" id="mode-live" onclick="setMode('live')"><span class="mi">🏆</span>Live quiz</div>
+      <div class="mode-btn" id="mode-test" onclick="setMode('test')"><span class="mi">🔍</span>Testmode</div>
+    </div>
+    <p class="mode-note" id="mode-note">Et hold læser op, et andet svarer. 3 runder = ca. 100 spørgsmål.</p>
+  </div>
+  <div class="scard">
+    <h2>Antal hold</h2>
+    <div class="num-btns" id="num-btns">
+      <button class="num-btn active" onclick="setN(2)">2</button>
+      <button class="num-btn" onclick="setN(3)">3</button>
+      <button class="num-btn" onclick="setN(4)">4</button>
+      <button class="num-btn" onclick="setN(5)">5</button>
+    </div>
+    <div style="height:8px"></div>
+    <div id="team-inputs"></div>
+  </div>
+  <p class="qs-info" id="qs-info"></p>
+  <button class="start-btn" id="start-live" onclick="startGame('live')">Start Quiz ▶</button>
+  <button class="test-start-btn" id="start-test" onclick="startGame('test')" style="display:none">🔍 Start Testmode</button>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" style="display:none">
+  <div class="round-bar">
+    <div class="round-bar-top">
+      <span class="round-label" id="round-label">Runde 1 af 3</span>
+      <div class="round-dots" id="round-dots"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="top-bar">
+    <span class="q-counter" id="qc">Spørgsmål 1</span>
+    <span class="cat-badge" id="cb">–</span>
+  </div>
+  <div class="top-bar" style="padding-top:0">
+    <span class="mode-ind live" id="mind">Live</span>
+    <div class="top-actions">
+      <button class="top-icon-btn" onclick="goSetup()">← Setup</button>
+      <button class="top-icon-btn danger" onclick="resetAll()">Nulstil</button>
+    </div>
+  </div>
+  <div class="scoreboard" id="sb"></div>
+  <div class="q-card">
+    <div class="roles-line" id="roles-line"></div>
+    <div class="q-text" id="qt">–</div>
+  </div>
+  <div class="ans-area">
+    <button class="reveal-btn" id="rbtn" onclick="revealAns()">Vis svar</button>
+    <div class="ans-inner" id="ans-inner">
+      <div class="ans-lbl">Svar</div>
+      <div class="ans-txt" id="at" style="display:none">–</div>
+      <div class="blur-row" id="blur-row" style="display:none">
+        <div class="blur-ans" id="ba">–</div>
+        <button class="peek-btn" id="pk" onclick="peekAns()">Vis svar</button>
+      </div>
+    </div>
+  </div>
+  <div class="score-sec" id="ss">
+    <div class="score-sec-lbl">Giv point — tryk for at ændre, derefter næste spørgsmål</div>
+    <div id="sg"></div>
+    <div class="reader-note" id="reader-note"></div>
+  </div>
+  <div class="awarded-bar" id="awarded-bar">
+    <span class="aw-txt" id="aw-txt"></span>
+    <button class="aw-undo" onclick="undoPoints()">↩ Fortryd</button>
+  </div>
+  <div class="nav-row">
+    <button class="prev-btn" id="prev-btn" onclick="prevQ()">← Forrige</button>
+    <button class="next-btn live-c" id="nb" onclick="nextQ()">Næste spørgsmål →</button>
+  </div>
+</div>
+
+<!-- BETWEEN ROUNDS -->
+<div id="between-screen" style="display:none">
+  <div class="between-title" id="between-title">Runde 1 færdig!</div>
+  <div class="between-round-dots" id="between-dots"></div>
+  <p class="between-info" id="between-info"></p>
+  <div class="between-scores" id="between-scores"></div>
+  <button class="next-round-btn" id="next-round-btn" onclick="startNextRound()">Start runde <span id="next-round-num">2</span> →</button>
+</div>
+
+<!-- END -->
+<div id="end-screen" style="display:none">
+  <h2>Spillet er slut!</h2>
+  <div style="font-size:2.8rem;margin:.3rem 0">🏆</div>
+  <div class="final-scores" id="fs"></div>
+  <div class="end-btns">
+    <button class="new-game-btn" onclick="startNewGame()">Nyt spil ▶</button>
+    <button class="reset-btn" onclick="resetAll()">Nulstil alt</button>
+  </div>
+</div>
+
+<script>
+const SAVE_KEY='busquiz_v7';
+const TOTAL_ROUNDS=3;
+
+const QS=[
+  // EM 1992 (9)
+  {c:"EM 1992",q:"Hvad var resultatet i EM-finalen 1992 mellem Danmark og Tyskland?",a:"2-0 til Danmark"},
+  {c:"EM 1992",q:"Hvem scorede Danmarks første mål i EM-finalen 1992?",a:"John 'Faxe' Jensen"},
+  {c:"EM 1992",q:"Hvem scorede Danmarks andet mål i EM-finalen 1992?",a:"Kim Vilfort"},
+  {c:"EM 1992",q:"Hvad hed Danmarks landstræner ved EM 1992?",a:"Richard Møller Nielsen"},
+  {c:"EM 1992",q:"Hvad hed stadion, hvor EM-finalen 1992 blev spillet?",a:"Nya Ullevi, Göteborg"},
+  {c:"EM 1992",q:"Hvem reddede et afgørende straffespark mod Holland i EM-semifinalen 1992?",a:"Peter Schmeichel"},
+  {c:"EM 1992",q:"Hvem løftede EM-pokalen som kaptajn for Danmark i 1992?",a:"Lars Olsen"},
+  {c:"EM 1992",q:"Hvorfor kom Danmark med til EM 1992, selvom de ikke havde kvalificeret sig?",a:"Jugoslavien blev udelukket pga. borgerkrig"},
+  {c:"EM 1992",q:"Hvad sagde TV-kommentatoren Flemming Toft, da dommeren fløjtede EM-finalen af?",a:"\"Knæk øllet op, lad propperne springe\""},
+  // Superligaen (19)
+  {c:"Superligaen",q:"Hvem har vundet flest Superliga-titler?",a:"FC København"},
+  {c:"Superligaen",q:"Hvornår startede Superligaen for første gang?",a:"1991"},
+  {c:"Superligaen",q:"Hvem vandt den allerførste Superliga-titel i 1991?",a:"Brøndby IF"},
+  {c:"Superligaen",q:"Hvem er Superligaens topscorer nogensinde med over 140 mål?",a:"Morten 'Duncan' Rasmussen"},
+  {c:"Superligaen",q:"Hvem satte rekorden for flest mål i én Superliga-sæson med 29 mål (FCK, 2018/19)?",a:"Robert Skov"},
+  {c:"Superligaen",q:"Hvem er den eneste klub der har spillet ALLE Superliga-sæsoner siden 1991?",a:"Brøndby IF"},
+  {c:"Superligaen",q:"Hvad er rekorden for antal tilskuere til én Superliga-kamp?",a:"41.201 (FCK mod Brøndby, april 2006)"},
+  {c:"Superligaen",q:"Hvem har vundet flest Superliga-titler som cheftræner?",a:"Ståle Solbakken"},
+  {c:"Superligaen",q:"Hvad er rekorden for flest sejre i træk i Superligaen?",a:"12 sejre (Brøndby, 1997/98)"},
+  {c:"Superligaen",q:"Hvilke to hold spillede i Superligaens mest målrige kamp nogensinde (10 mål)?",a:"Silkeborg IF og AaB (4-6, 2007)"},
+  {c:"Superligaen",q:"Hvem vandt Superligaen sæsonen 2023/24?",a:"FC Midtjylland"},
+  {c:"Superligaen",q:"Hvad hedder FC Midtjyllands hjemmebane?",a:"MCH Arena (Herning)"},
+  {c:"Superligaen",q:"Hvornår vandt OB sidst Superligaen?",a:"2018"},
+  {c:"Superligaen",q:"Hvad er FCK's Parken's officielle navn?",a:"Parken (Nationalstadion)"},
+  {c:"Superligaen",q:"Hvilken klub har historisk haft det højeste tilskuergennemsnit i Superligaen?",a:"FC København"},
+  {c:"Superligaen",q:"Hvem var cheftræner for Brøndby IF da de vandt Superligaen 2020/21?",a:"Niels Frederiksen"},
+  {c:"Superligaen",q:"Hvad er Brøndbys officielle stadionkapacitet?",a:"Ca. 20.000 (Brøndby Stadion)"},
+  {c:"Superligaen",q:"Hvad er det maksimale antal udlandske spillere et Superliga-hold kan stille på banen?",a:"Der er ingen grænse for EU-spillere – men ikke-EU spillere kræver arbejdstilladelse"},
+  {c:"Superligaen",q:"Hvem har scoret flest mål i én enkelt Superliga-kamp?",a:"4 mål er scoret af adskillige spillere i én kamp – ingen officiel 5-mål rekord"},
+  // VM (30)
+  {c:"VM",q:"Hvem har scoret flest mål ved VM i alt?",a:"Miroslav Klose – 16 mål"},
+  {c:"VM",q:"Hvem scorede flest mål i én enkelt VM-slutrunde?",a:"Just Fontaine – 13 mål (Frankrig, 1958)"},
+  {c:"VM",q:"Hvad land har vundet flest VM-titler?",a:"Brasilien – 5 titler"},
+  {c:"VM",q:"Hvornår var Danmarks VM-debut?",a:"1986 i Mexico"},
+  {c:"VM",q:"Hvem scorede Danmarks allerførste VM-mål mod Skotland i 1986?",a:"Preben Elkjær"},
+  {c:"VM",q:"Hvad er Danmarks bedste VM-placering nogensinde?",a:"Kvartfinale i 1998"},
+  {c:"VM",q:"Hvem vandt VM 1998 på hjemmebane?",a:"Frankrig"},
+  {c:"VM",q:"Hvem vandt VM 2014 i Brasilien?",a:"Tyskland"},
+  {c:"VM",q:"Hvem vandt VM 2022 i Qatar?",a:"Argentina"},
+  {c:"VM",q:"Hvem er den yngste verdensmester i fodboldhistorien?",a:"Pelé – 17 år (Brasilien, 1958)"},
+  {c:"VM",q:"Hvad er det hurtigste mål i VM-historien?",a:"11 sekunder – Hakan Şükür (Tyrkiet, 2002)"},
+  {c:"VM",q:"Hvem var Skotlands landstræner da Danmark mødte dem i VM-debuten i 1986?",a:"Alex Ferguson"},
+  {c:"VM",q:"Hvem vandt VM 2010 i Sydafrika?",a:"Spanien"},
+  {c:"VM",q:"Hvad er det eneste land der har deltaget i ALLE VM-slutrunder siden 1930?",a:"Brasilien"},
+  {c:"VM",q:"Hvem vandt VM 2002 i Japan og Sydkorea?",a:"Brasilien"},
+  {c:"VM",q:"Hvad land arrangerede VM 1966, og hvem vandt?",a:"England arrangerede og vandt"},
+  {c:"VM",q:"Hvad hedder den VM-trofæ der bruges i dag, og hvornår blev den indviet?",a:"FIFA World Cup Trophy – indviet 1974"},
+  {c:"VM",q:"Hvad var resultatet i den mest målrige VM-kamp nogensinde?",a:"Ungarn 10-1 El Salvador (VM 1982)"},
+  {c:"VM",q:"Hvilke to nationer har vundet VM to gange i træk?",a:"Italien (1934+1938) og Brasilien (1958+1962)"},
+  {c:"VM",q:"Hvem scorede vinderens mål i VM-finalen 2010?",a:"Andrés Iniesta (Spanien mod Holland, 1-0 i forlænget spilletid)"},
+  {c:"VM",q:"Hvad var den kontroversielle hændelse i VM-finalen 2006?",a:"Zidane headede Materazzi i brystet og fik rødt kort i forlænget spilletid"},
+  {c:"VM",q:"Hvem slog Danmark ud i kvartfinalen ved VM 1998?",a:"Brasilien (3-2)"},
+  {c:"VM",q:"Hvem var topscorer ved VM 2022 i Qatar?",a:"Kylian Mbappé – 8 mål"},
+  {c:"VM",q:"Hvad var resultatet i VM-finalen 1994 og hvordan afgjordes den?",a:"0-0 efter forlænget spilletid – Brasilien vandt over Italien på straffespark"},
+  {c:"VM",q:"Hvem scorede 'Målet i det århundrede' ved VM 1986?",a:"Diego Maradona (mod England)"},
+  {c:"VM",q:"Hvad hed stadion hvor VM-finalen 2022 i Qatar blev spillet?",a:"Lusail Stadium"},
+  {c:"VM",q:"Hvem holdt rekorden for flest VM-slutrundedeltagelser som spiller?",a:"Antonio Carbajal og Lothar Matthäus – 5 slutrunder"},
+  {c:"VM",q:"Hvad er 'Guds hånd'-kampens fulde kontekst?",a:"VM 1986 kvartfinale – Maradona scorede med hånden OG scorede 'Målet i det århundrede' – Argentina slog England 2-1"},
+  {c:"VM",q:"Hvad hed VM 2026's tre værtslande?",a:"USA, Canada og Mexico"},
+  {c:"VM",q:"Hvem er den eneste spiller der er kåret til VM's bedste spiller (Golden Ball) tre gange?",a:"Ingen har vundet den tre gange – Messi har vundet den to gange (2014 og 2022)"},
+  // Champions League (25)
+  {c:"Champions League",q:"Hvem er Champions Leagues topscorer nogensinde?",a:"Cristiano Ronaldo – 140 mål"},
+  {c:"Champions League",q:"Hvem er nummer to på listen over CL-topscorere nogensinde?",a:"Lionel Messi – 129 mål"},
+  {c:"Champions League",q:"Hvem holdt rekorden for flest CL-mål inden Messi og Ronaldo overtog den?",a:"Raúl – 71 mål"},
+  {c:"Champions League",q:"Hvem mødte Manchester United i CL-finalen 1999 i den legendariske vending i tillægstiden?",a:"Bayern München"},
+  {c:"Champions League",q:"Hvad klub har vundet Champions League flest gange?",a:"Real Madrid (15 gange)"},
+  {c:"Champions League",q:"Hvem er den eneste spiller der har scoret 5 mål i én og samme CL-kamp?",a:"Lionel Messi"},
+  {c:"Champions League",q:"Hvad er Ronaldos rekord for antal individuelle CL-topscorerpriser?",a:"7 gange"},
+  {c:"Champions League",q:"Real Madrid vandt tre CL-titler i træk 2016-2018. Hvem scorede finalmålet i 2018 mod Liverpool?",a:"Gareth Bale"},
+  {c:"Champions League",q:"Hvem er den tredje spiller i historien til at nå 100 CL-mål?",a:"Robert Lewandowski"},
+  {c:"Champions League",q:"I hvilket år vandt Liverpool CL på dramatisk vis over AC Milan efter at have tabt 0-3 til pause?",a:"2005 – Istanbul (CL-finalen)"},
+  {c:"Champions League",q:"Hvilken klub vandt CL i 2022/23?",a:"Manchester City"},
+  {c:"Champions League",q:"Hvem var den første træner til at vinde CL med to forskellige klubber?",a:"Ottmar Hitzfeld (Dortmund 1997, Bayern 2001)"},
+  {c:"Champions League",q:"I hvilken CL-kamp scorede Lionel Messi de 5 mål?",a:"Barcelona 7-1 Bayer Leverkusen (2012)"},
+  {c:"Champions League",q:"Hvad hed turneringen inden den blev omdøbt til Champions League?",a:"Europacuppen for mesterhold (European Cup)"},
+  {c:"Champions League",q:"Hvem vandt den første Europacup (nu CL) i 1955/56?",a:"Real Madrid"},
+  {c:"Champions League",q:"Hvad er rekorden for flest CL-finaleoptræden som spiller?",a:"Paolo Maldini – 3 finaler (vandt 2)"},
+  {c:"Champions League",q:"Hvad klub var den første engelske til at vinde Europacuppen?",a:"Manchester United (1968)"},
+  {c:"Champions League",q:"Hvem vandt CL i sæsonen 2023/24?",a:"Real Madrid"},
+  {c:"Champions League",q:"Hvad er rekorden for flest CL-sejre for en enkelt klub i ét årti?",a:"Real Madrid – 5 titler i 2010'erne"},
+  {c:"Champions League",q:"Hvad er den kendte melodi der spilles inden CL-kampe?",a:"UEFA Champions League-hymnen (komponeret af Tony Britten, 1992)"},
+  {c:"Champions League",q:"Hvad er UEFA's officielle bold-leverandør til CL?",a:"Adidas"},
+  {c:"Champions League",q:"Hvilken by er hjemsted for UEFA's hovedkvarter?",a:"Nyon, Schweiz"},
+  {c:"Champions League",q:"Hvad er den maksimale antal hold fra ét land i CL-gruppespillet?",a:"Typisk 4-5 hold fra de største ligaer (England, Spanien, Tyskland, Italien, Frankrig)"},
+  {c:"Champions League",q:"Hvad er 'away goals'-reglen og hvornår blev den afskaffet?",a:"Udemål talte dobbelt ved uafgjort resultat over to kampe – afskaffet af UEFA fra 2021/22"},
+  {c:"Champions League",q:"Hvem scorede hat-trick i CL-kvartfinalen og semifinalen for Real Madrid i 2022 og sendte dem til finalen?",a:"Karim Benzema (scorede 10 mål i de 4 knockoutkampe, inkl. hat-tricks)"},
+  // Premier League (20)
+  {c:"Premier League",q:"Hvem har scoret flest mål i Premier League-historien?",a:"Alan Shearer – 260 mål"},
+  {c:"Premier League",q:"Hvem satte rekorden for flest mål i én PL-sæson med 36 mål (2022/23)?",a:"Erling Haaland (Manchester City)"},
+  {c:"Premier League",q:"Hvem har vundet flest Premier League-titler?",a:"Manchester United – 13 titler"},
+  {c:"Premier League",q:"Hvad hold gennemførte sæsonen 2003/04 uden et eneste nederlag?",a:"Arsenal (\"The Invincibles\")"},
+  {c:"Premier League",q:"Hvad er rekorden for flest point i én PL-sæson?",a:"100 point (Manchester City, 2017/18)"},
+  {c:"Premier League",q:"Hvem har flest Premier League-assists nogensinde?",a:"Ryan Giggs – 162 assists"},
+  {c:"Premier League",q:"Hvad er rekorden for hurtigste hattrick i Premier League-historien?",a:"2 min 56 sek – Sadio Mané (Southampton, 2015)"},
+  {c:"Premier League",q:"Hvem holder rekorden for flest clean sheets som målmand i Premier League?",a:"Petr Cech – 202 clean sheets"},
+  {c:"Premier League",q:"Hvad klub vandt Premier League i 1994/95 med Alan Shearer som topscorer?",a:"Blackburn Rovers"},
+  {c:"Premier League",q:"Hvem har spillet flest kampe i Premier League-historien?",a:"Gareth Barry – 653 kampe"},
+  {c:"Premier League",q:"I hvilken sæson vandt Leicester City sensationelt Premier League?",a:"2015/16"},
+  {c:"Premier League",q:"Hvem var topscorer da Leicester vandt PL i 2015/16?",a:"Jamie Vardy – 24 mål"},
+  {c:"Premier League",q:"Hvad er den største sejr i Premier League-historien?",a:"Manchester United 9-0 Southampton (2021) – og Southampton 9-0 Leicester (2019)"},
+  {c:"Premier League",q:"Hvem vandt Premier League titlen 2023/24?",a:"Manchester City (4. titel i træk)"},
+  {c:"Premier League",q:"Hvem har vundet flest PL-guldmedaljer som spiller?",a:"Ryan Giggs – 13 titler med Manchester United"},
+  {c:"Premier League",q:"Hvornår startede Premier League som vi kender det?",a:"1992/93"},
+  {c:"Premier League",q:"Hvem er den mest succesfulde PL-manager nogensinde?",a:"Sir Alex Ferguson – 13 titler med Manchester United"},
+  {c:"Premier League",q:"Hvem vandt PL's Golden Boot flest gange?",a:"Harry Kane – 4 gange (2016, 2017, 2021, 2023)"},
+  {c:"Premier League",q:"Hvad er rekorden for flest mål i én Premier League-kamp?",a:"9 mål – Manchester United 9-0 Southampton (2021)"},
+  {c:"Premier League",q:"Hvilken manager vandt PL med Chelsea to gange i 2000'erne?",a:"José Mourinho (2004/05 og 2005/06)"},
+  // Taktik & Træning (30)
+  {c:"Taktik & Træning",q:"Hvad er forskellen på et 4-3-3 og et 4-2-3-1 system?",a:"4-3-3 har tre jævnbyrdige midtbanespillere; 4-2-3-1 har en dobbelt pivot bag én nummer 10 og tre angribende spillere"},
+  {c:"Taktik & Træning",q:"Hvad er et 'pressing trigger', og giv et konkret eksempel?",a:"Et forudbestemt signal der aktiverer koordineret pres – fx dårlig kontrol, bagbasspas til målmanden eller bold i bestemt zone"},
+  {c:"Taktik & Træning",q:"Hvad forstås ved 'half-spaces' i fodboldtaktik?",a:"Zonerne mellem centralt og kanten – bruges typisk af brede angribere der rykker ind mod mål"},
+  {c:"Taktik & Træning",q:"Hvad er 'gegenpressing', og hvem populariserede begrebet?",a:"Øjeblikkelig genpresning efter boldtab; populariseret af Jürgen Klopp (Dortmund/Liverpool)"},
+  {c:"Taktik & Træning",q:"Hvad er forskellen på 'overlap' og 'underlap' for en fuldback?",a:"Overlap: fuldbacken løber udenom kantspilleren. Underlap: ind bag kantspilleren mod midten"},
+  {c:"Taktik & Træning",q:"Hvad er et 'false nine', og hvilken spiller er mest forbundet med rollen?",a:"En angriber der falder dybt og skaber rum; mest forbundet med Messi under Guardiola i Barcelona"},
+  {c:"Taktik & Træning",q:"Hvad er 'periodisering' i trænerlære?",a:"Strukturering af sæsonen i perioder med varierende intensitet for at toppe til vigtige kampe og undgå overtræning"},
+  {c:"Taktik & Træning",q:"Hvad er de fire spillefaser i DBU's spilleridémodel?",a:"1) Forsvar, 2) Positiv transition, 3) Angreb, 4) Negativ transition"},
+  {c:"Taktik & Træning",q:"Hvad er 'LTPD', og hvad er kerneprincippet?",a:"Long-Term Player Development – tilrettelæg træning i takt med spillerens biologiske og motoriske udviklingsstadier"},
+  {c:"Taktik & Træning",q:"Hvad er 'rondos', og hvad er deres primære formål?",a:"Besiddelsesøvelser (cirkel med en/to i midten); primært formål er pasningshastighed, rumopfattelse og første berøring"},
+  {c:"Taktik & Træning",q:"Hvad er 'zonal marking' – og hvad er fordelen fremfor 'man-marking'?",a:"Hold en zone frem for at følge en spiller; holdet bevarer sin form og trækkes ikke ud af position"},
+  {c:"Taktik & Træning",q:"Hvad er 'high block' mod 'low block' defensivt?",a:"High block: pres højt på banen. Low block: kompakt blok nær eget mål – inviterer modstander til at spille foran"},
+  {c:"Taktik & Træning",q:"Hvad er 'transitions' i fodbold, og hvilke to typer skelnes der imellem?",a:"Positiv transition (forsvar→angreb) og negativ transition (angreb→forsvar)"},
+  {c:"Taktik & Træning",q:"Hvad er 'compactness' som defensivt begreb?",a:"Holdet reducerer afstand mellem linjer og fra side til side – skaber en tæt blok der er svær at spille igennem"},
+  {c:"Taktik & Træning",q:"Hvad er en 'inverted winger' og hvad er dens primære fordel?",a:"En kantspiller der spiller på modsatte side af sin stærke fod – kan skyde på mål og overbelaste midten"},
+  {c:"Taktik & Træning",q:"Hvad er 'tiki-taka' og hvilken klub og træner forbindes det primært med?",a:"Hurtig pasningsspil med konstant bevægelse og besiddelse; primært FC Barcelona under Pep Guardiola"},
+  {c:"Taktik & Træning",q:"Hvad er 'xG' (expected goals)?",a:"En model der beregner sandsynligheden for at en afslutning ender som mål, baseret på position, vinkel og afstand"},
+  {c:"Taktik & Træning",q:"Hvad er 'pressing intensity' og hvordan måles det?",a:"Holdet aktivt presser modstandere; måles bl.a. via PPDA (passes allowed per defensive action) – lavt PPDA = højt pres"},
+  {c:"Taktik & Træning",q:"Hvad er 'juego de posición' (positional play)?",a:"At besætte specifikke banepositioner for at skabe overtal lokalt, kontrollere rum og tvinge modstanderen til at reagere"},
+  {c:"Taktik & Træning",q:"Hvad er 'the golden age of learning' motorisk, og hvad anbefales?",a:"Ca. 8-12 år – barnet er mest modtageligt for motoriske færdigheder; fokus bør være på alsidighed og teknik"},
+  {c:"Taktik & Træning",q:"Hvad er 'deliberate practice' og hvem introducerede begrebet?",a:"Målrettet struktureret træning med fokus på svage punkter og feedback; introduceret af Anders Ericsson"},
+  {c:"Taktik & Træning",q:"Hvad er 'relative age effect' (RAE) i ungdomsfodbold?",a:"Spillere født tidligt på året er fysisk mere modne og overrepræsenteret i talentudviklingen"},
+  {c:"Taktik & Træning",q:"Hvad er formålet med 'small-sided games' i træning?",a:"Øger antal boldberøringer, beslutninger og intensitet pr. spiller – simulerer kampens krav i reduceret format"},
+  {c:"Taktik & Træning",q:"Hvad er 'build-up play' fra bagtræf?",a:"Opbygning fra bageste linje med keeper og forsvar involveret – mål er at skabe overtal og spille sig frem kontrolleret"},
+  {c:"Taktik & Træning",q:"Hvad er 'set-piece coaching' som specialdisciplin?",a:"Specialiseret træning og analyse af dødbolde – bidrager med ca. 25-30% af alle topfodboldscoringer"},
+  {c:"Taktik & Træning",q:"Hvad er 'the false fullback' taktisk?",a:"Fuldback der rykker ind i central midtbane når holdet har bolden – frigør kanten og skaber overtal centralt"},
+  {c:"Taktik & Træning",q:"Hvad er 'ecological dynamics' i træningslære?",a:"Tilgang der ser spiller-miljø-interaktion som styrende for læring – øvelser designes med realistiske affordances"},
+  {c:"Taktik & Træning",q:"Hvad er 'PPDA' i fodboldanalyse?",a:"Passes Per Defensive Action – måler pressing-intensitet; lavt tal = aggressivt pres"},
+  {c:"Taktik & Træning",q:"Hvad er 'pressing shadow' som taktisk begreb?",a:"Positionen en spiller tager for at skærme af for en afleveringsmulighed – presser indirekte"},
+  {c:"Taktik & Træning",q:"Hvad er 'non-linear pedagogy' i trænerfaget?",a:"Træningstilgang der bruger opgavebegrænsninger (tid, rum, antal spillere) til at fremkalde ønsket adfærd"},
+  // Fodboldhistorie (30)
+  {c:"Fodboldhistorie",q:"Hvornår blev FIFA grundlagt, og i hvilken by?",a:"1904 i Paris"},
+  {c:"Fodboldhistorie",q:"Hvad hed det første VM's vinder i 1930, og hvor blev det afholdt?",a:"Uruguay vandt – afholdt i Uruguay"},
+  {c:"Fodboldhistorie",q:"Hvad skete der med den originale Jules Rimet-pokal?",a:"Brasilien beholdt den permanent efter tredje VM-titel i 1970 – den blev stjålet i 1983 og aldrig genfundet"},
+  {c:"Fodboldhistorie",q:"Hvad er 'Miracle of Bern'?",a:"Vesttysklands overraskende VM-finalesejr over Ungarn (3-2) i 1954 – betragtes som tysk fodbolds fødsel"},
+  {c:"Fodboldhistorie",q:"Hvad skete ved EM 1976-finalen, og hvem scorede det afgørende straffespark?",a:"Panenka chippede sparket ned i midten – Tjekkoslovakiet slog Vesttyskland og gav navn til 'Panenka-sparket'"},
+  {c:"Fodboldhistorie",q:"Hvornår fastsatte FA de første skriftlige fodboldregler?",a:"1863 – Football Association (FA) blev stiftet i London"},
+  {c:"Fodboldhistorie",q:"Hvad er 'The Busby Babes', og hvad skete der i 1958?",a:"Manchester Uniteds unge hold under Matt Busby – otte spillere omkom i flyulykken i München den 6. februar 1958"},
+  {c:"Fodboldhistorie",q:"Hvem var den første europæiske klub til at vinde Europacuppen?",a:"Real Madrid – 1956"},
+  {c:"Fodboldhistorie",q:"I hvilket år fik kvinder lov til at spille fodbold under DBU?",a:"1972"},
+  {c:"Fodboldhistorie",q:"Hvad betød 'Bosman-dommen' fra 1995?",a:"Spillere kan frit skifte klub ved kontraktudløb – ophævede transfer-blokaden for EU-borgere"},
+  {c:"Fodboldhistorie",q:"I hvilken kamp scorede Pelé sit 1000. karrieremål?",a:"Mod Vasco da Gama for Santos – straffespark den 19. november 1969 i Maracanã"},
+  {c:"Fodboldhistorie",q:"Hvad er 'Total Football' og hvem er det forbundet med?",a:"Nederlandsk spillestil (1970'erne) hvor alle spillere skifter positioner flydende; Rinus Michels og Ajax/Holland"},
+  {c:"Fodboldhistorie",q:"Hvad er 'Calciopoli'-skandalen?",a:"2006 – Juventus og andre italienske klubber afsløret i at manipulere dommertildeling; Juventus rykkede ned"},
+  {c:"Fodboldhistorie",q:"Hvad er 'The Invincibles' og hvilken rekord satte de?",a:"Arsenal 2003/04 – gennemførte PL-sæsonen uden et eneste nederlag (26 sejre, 12 uafgjort)"},
+  {c:"Fodboldhistorie",q:"Hvad skete ved Hillsborough i 1989?",a:"97 Liverpool-fans omkom i en menneskemasse-katastrofe under FA Cup-semifinale mod Nottingham Forest"},
+  {c:"Fodboldhistorie",q:"Hvad er 'The Miracle of Istanbul'?",a:"CL-finalen 2005 – Liverpool tabte 0-3 til pause mod AC Milan, vandt på straffespark efter 3-3"},
+  {c:"Fodboldhistorie",q:"Hvem grundlagde Football League – den første liga i verden?",a:"William McGregor grundlagde The Football League i England i 1888"},
+  {c:"Fodboldhistorie",q:"Hvornår blev professionel fodbold legaliseret i England?",a:"1885 – FA legaliserede professionel fodbold"},
+  {c:"Fodboldhistorie",q:"Hvornår introducerede UEFA Financial Fair Play (FFP)?",a:"2009 – vedtaget; trådte i kraft fra 2011/12"},
+  {c:"Fodboldhistorie",q:"Hvad er den historiske baggrund for 'El Clásico'?",a:"Real Madrid repræsenterede centralmagten, FC Barcelona repræsenterede catalansk identitet og modstand mod Madrid-centralisme"},
+  {c:"Fodboldhistorie",q:"Hvad var 'The Superleague'-projektet i 2021?",a:"12 topklubber forsøgte at danne en lukket europæisk superliga – brød sammen efter 48 timer pga. massiv modstand"},
+  {c:"Fodboldhistorie",q:"Hvad er VAR og hvornår blev det indført i FIFA-turneringer?",a:"Video Assistant Referee – indført officielt ved VM 2018 i Rusland"},
+  {c:"Fodboldhistorie",q:"Hvad er IFAB og hvad er organisationens rolle?",a:"International Football Association Board – ejer og opdaterer fodboldreglerne; FIFA + de fire britiske forbund"},
+  {c:"Fodboldhistorie",q:"Hvad er 'The Battle of Santiago' fra VM 1962?",a:"Chile vs. Italien – en af de mest voldelige kampe i VM-historien med to udvisninger og gentagne slagsmål"},
+  {c:"Fodboldhistorie",q:"Hvad er Johan Cruyff's vigtigste bidrag til fodboldhistorien?",a:"Symbol på Total Football; som træner opfandt han 'La Masia'-filosofien og grundlagde Barcelona som spillestilideal"},
+  {c:"Fodboldhistorie",q:"Hvem er den nuværende FIFA-præsident (pr. 2025)?",a:"Gianni Infantino"},
+  {c:"Fodboldhistorie",q:"Hvornår spillede Danmark for første gang mod et andet nationalt hold?",a:"1908 – Danmark vs. England (tabte 0-5) ved OL i London"},
+  {c:"Fodboldhistorie",q:"Hvad er UEFA Nations League og hvornår blev det introduceret?",a:"Ny UEFA-landsholdsturnering i stedet for venskabskampe – første udgave 2018/19"},
+  {c:"Fodboldhistorie",q:"Hvad er FIFA's officielle antal regler i Laws of the Game?",a:"17 regler"},
+  {c:"Fodboldhistorie",q:"Hvad er 'Heysel-katastrofen' i 1985?",a:"39 tilskuere (primært Juventus-fans) omkom da en mur kollapsede inden CL-finalen Juventus vs Liverpool – engelske klubber udelukket fra europæisk fodbold i 5 år"},
+  // Fodboldlegender (30)
+  {c:"Fodboldlegender",q:"Hvad nationalitet er Lionel Messi?",a:"Argentinsk"},
+  {c:"Fodboldlegender",q:"Hvad nationalitet er Cristiano Ronaldo?",a:"Portugisisk"},
+  {c:"Fodboldlegender",q:"Mod hvad hold lavede Maradona sin berømte 'Guds hånd'-scoring?",a:"England"},
+  {c:"Fodboldlegender",q:"I hvilken italiensk klub vandt Maradona to Serie A-titler?",a:"Napoli"},
+  {c:"Fodboldlegender",q:"Hvem er den eneste spiller der har vundet tre VM-titler?",a:"Pelé (1958, 1962 og 1970)"},
+  {c:"Fodboldlegender",q:"For hvilken engelsk klub spillede Peter Schmeichel sin største karriere?",a:"Manchester United"},
+  {c:"Fodboldlegender",q:"Hvem scorede begge mål for Brasilien i VM-finalen 2002 mod Tyskland?",a:"Ronaldo (den brasilianske)"},
+  {c:"Fodboldlegender",q:"Hvad hed Michael Laudrups bror der også spillede på det danske landshold?",a:"Brian Laudrup"},
+  {c:"Fodboldlegender",q:"Hvad er Zinedine Zidanes nationalitet?",a:"Fransk"},
+  {c:"Fodboldlegender",q:"Hvad er Zlatan Ibrahimovićs nationalitet?",a:"Svensk"},
+  {c:"Fodboldlegender",q:"Hvad nummer bærer Lionel Messi typisk?",a:"10"},
+  {c:"Fodboldlegender",q:"Hvad rygnummer er Cristiano Ronaldo ikonisk forbundet med fra Manchester United?",a:"7"},
+  {c:"Fodboldlegender",q:"Hvem vandt flest Ballon d'Or priser nogensinde?",a:"Lionel Messi – 8 priser (pr. 2024)"},
+  {c:"Fodboldlegender",q:"Hvad er Roberto Carlos særlig berømt for?",a:"Brasiliansk venstrefuldback – ekstremt hårde frisparksmarkeringer med kraftig kurve; var meget offensiv"},
+  {c:"Fodboldlegender",q:"For hvilken klub spillede Ronaldinho sin bedste fodbold?",a:"FC Barcelona (2003-2008) – vandt CL 2006 og Ballon d'Or 2005"},
+  {c:"Fodboldlegender",q:"Hvad er Lev Yashin's historiske betydning?",a:"Sovjetisk keeper – eneste keeper nogensinde der har vundet Ballon d'Or (1963)"},
+  {c:"Fodboldlegender",q:"Hvad er Zlatan Ibrahimovićs mest ikoniske mål?",a:"Hælskub for Sverige mod England 2012 (4-2) – en 30-meters bicycle kick"},
+  {c:"Fodboldlegender",q:"Hvem er Franz Beckenbauer og hvad er hans unikke bedrift?",a:"Tysker – vandt VM som spiller (1974) og som træner (1990); opfandt 'libero'-rollen"},
+  {c:"Fodboldlegender",q:"Hvad er Thierry Henrys nationalitet og hvilken klub er han mest forbundet med?",a:"Fransk – Arsenal (rekordmålscorer for klubben)"},
+  {c:"Fodboldlegender",q:"Hvad er Gerd Müller særlig ved som målscorer?",a:"Tysker – 68 mål i 62 landskampe og 365 Bundesliga-mål; scoring-rate der overgår næsten alle"},
+  {c:"Fodboldlegender",q:"Hvad er Marco van Basten's karriere mest forbundet med?",a:"Nederlandsk angriber – tre Ballon d'Or; spektakulær volleyscoring i EM 1988-finalen; karrierestopper pga. ankelskade"},
+  {c:"Fodboldlegender",q:"Hvad er Didier Drogba's nationalitet og hvad er han bedst husket for?",a:"Ivorianer – scorede i 93. min. i CL-finalen 2012 og Chelsea vandt på straffespark"},
+  {c:"Fodboldlegender",q:"Hvem vandt Ballon d'Or 2023?",a:"Lionel Messi (8. gang)"},
+  {c:"Fodboldlegender",q:"Hvad er Kylian Mbappés fødested og nationalitet?",a:"Født i Bondy, Frankrig – fransk"},
+  {c:"Fodboldlegender",q:"Hvad er Eusébio's nationalitet og baggrund?",a:"Portugisisk (født i Mozambique) – regnes som en af fodboldhistoriens bedste angribere"},
+  {c:"Fodboldlegender",q:"Hvad er Neymar Jr's nationalitet og for hvilke klubber er han mest kendt?",a:"Brasiliansk – Santos, FC Barcelona og PSG"},
+  {c:"Fodboldlegender",q:"Hvad er Ronaldo Nazário (den brasilianske) regnet som i fodboldhistorien?",a:"En af de bedste angribere nogensinde – vandt VM 1994 og 2002 og to Ballon d'Or-priser"},
+  {c:"Fodboldlegender",q:"Hvem er Michael Laudrups mest berømte klubber?",a:"Juventus, FC Barcelona, Real Madrid, Brøndby IF og det danske landshold"},
+  {c:"Fodboldlegender",q:"Hvad er Andreas Christensens position og klub?",a:"Midterforsvarer (CB) – spiller for FC Barcelona og det danske landshold"},
+  {c:"Fodboldlegender",q:"Hvad er Rasmus Højlunds klub og position (pr. 2025)?",a:"Angriber – Manchester United"},
+  // Dansk fodbold (25)
+  {c:"Dansk fodbold",q:"Hvem er den nuværende landstræner for det danske herrelandshold (pr. 2025)?",a:"Brian Riemer"},
+  {c:"Dansk fodbold",q:"Hvem er Danmarks mestscorende spiller i historien på landsholdet?",a:"Poul Nielsen og Jon Dahl Tomasson – begge 52 mål (officielt)"},
+  {c:"Dansk fodbold",q:"Hvad er Danmarks seneste EM-deltagelse og resultat?",a:"EM 2024 i Tyskland – tabte i kvartfinalen til England (1-2 i forlænget spilletid)"},
+  {c:"Dansk fodbold",q:"Hvad er 'Danish Dynamite', og hvem var den centrale træner?",a:"Tilnavn til 1980'ernes landshold; Sepp Piontek (tysk) var landstræner 1979-1990"},
+  {c:"Dansk fodbold",q:"Hvad skete der med Christian Eriksen ved EM 2021?",a:"Han fik hjertestop under Danmarks første kamp mod Finland og blev genoplivet på banen"},
+  {c:"Dansk fodbold",q:"Hvad er Kasper Schmeichels vigtigste bedrift med klubhold?",a:"Vandt Premier League med Leicester City 2015/16 – et af sportens største sensationer"},
+  {c:"Dansk fodbold",q:"Hvem er de mest ikoniske spillere i Danmarks EM-finalesejr 1992?",a:"Schmeichel, Lars Olsen, Kim Vilfort, John Jensen, Flemming Povlsen m.fl."},
+  {c:"Dansk fodbold",q:"Hvad er 'Roligans' i dansk fodboldkultur?",a:"Danske fans kendte for festlig, fredelig adfærd – modbevægelse til huliganisme; opstod i 1980'erne"},
+  {c:"Dansk fodbold",q:"Hvem var den første dansker til at vinde Champions League som spiller?",a:"Peter Schmeichel – Manchester United 1999"},
+  {c:"Dansk fodbold",q:"Hvad er Preben Elkjærs tilnavn og hvilken klub er han bedst husket fra?",a:"'Preben the Locomotive' – Hellas Verona i Serie A"},
+  {c:"Dansk fodbold",q:"Hvad er Allan Nielsens bedste internationale øjeblik?",a:"Scorede det afgørende header mod Tyrkiet i VM-playoff 1997 i 90. minut – Danmark kvalificerede sig til VM 1998"},
+  {c:"Dansk fodbold",q:"Hvad er Nicklas Bendtner bedst husket for på og uden for banen?",a:"Markant angriber – Arsenal; berømt for ekscentrisk selvtillid og sponsorpantser-RM ved EM 2012"},
+  {c:"Dansk fodbold",q:"Hvem er den nuværende anfører for det danske herrelandshold (pr. 2025)?",a:"Christian Eriksen"},
+  {c:"Dansk fodbold",q:"Hvad vandt Danmark ved U21-EM 2015?",a:"Danmark vandt U21-EM 2015 i Tjekkiet – slog Sverige i finalen 4-3 efter straffespark"},
+  {c:"Dansk fodbold",q:"Hvad er den største sejr i dansk fodboldhistorie på landshold?",a:"17-1 mod Frankrig i 1908 (OL) – Danmarks rekordresultat"},
+  {c:"Dansk fodbold",q:"Hvad er Simon Kjær bedst husket for – ud over fodbold?",a:"Hans øjeblikkelige handling da han hjalp Eriksen efter hjertestoppet ved EM 2021"},
+  {c:"Dansk fodbold",q:"Hvad er Mikkel Damsgaards vigtigste præstation?",a:"Scorede direkte fra hjørnespark mod England i EM 2021-semifinale"},
+  {c:"Dansk fodbold",q:"Hvad er DBU's officielle mission for ungdomsfodbold?",a:"'Fodbold for alle' – inklusion, trivsel og udvikling frem for eliteresultater i de yngste årgange"},
+  {c:"Dansk fodbold",q:"Hvem var den første dansker til at spille i en stor europæisk liga?",a:"Michael Laudrup – Juventus (1983) er den mest markante tidlige eksport"},
+  {c:"Dansk fodbold",q:"Hvad er Brøndby IF's historiske europæiske bedrift?",a:"CL-semifinale i 1990/91 – tabte til Benfica; regnes som klubbens bedste europæiske sæson"},
+  {c:"Dansk fodbold",q:"Hvad er FCK's bedste europæiske sæson?",a:"Gruppespillet i CL 2010/11 – kom videre fra gruppen med Arsenal og Manchester United"},
+  {c:"Dansk fodbold",q:"Hvad er Kasper Dolbergs vigtigste internationale præstation?",a:"Scorede to mål for Danmark mod Vestindiske Øer og er regnet som del af generationen efter Eriksen"},
+  {c:"Dansk fodbold",q:"Hvem var landstræner for Danmark da de kvalificerede sig til VM 1998?",a:"Bo Johansson (svensk)"},
+  {c:"Dansk fodbold",q:"Hvad er Martin Braithwaites karrierehøjdepunkt med dansk landshold?",a:"Spillet ved EM 2021 semifinale – var del af holdet der nåede semifinalen"},
+  {c:"Dansk fodbold",q:"Hvad er Pierre-Emile Højbjergs position og nuværende klub (pr. 2025)?",a:"Defensiv midtbanespiller – Atletico Madrid (skiftede fra Tottenham 2024)"},
+  // Europæiske ligaer (20)
+  {c:"Europæiske ligaer",q:"Hvad er den mest succesfulde klub i Bundesligaens historie?",a:"Bayern München"},
+  {c:"Europæiske ligaer",q:"Hvem er Bundesligaens topscorer nogensinde?",a:"Gerd Müller – 365 mål"},
+  {c:"Europæiske ligaer",q:"Hvad er Serie A's mest succesfulde klub historisk?",a:"Juventus – flest Serie A-titler"},
+  {c:"Europæiske ligaer",q:"Hvad er La Liga's mest succesfulde klub historisk?",a:"Real Madrid – flest La Liga-titler"},
+  {c:"Europæiske ligaer",q:"Hvem er La Liga's topscorer nogensinde?",a:"Lionel Messi – over 470 La Liga-mål for Barcelona"},
+  {c:"Europæiske ligaer",q:"Hvad er Eredivisie og hvad er den mest ikoniske klub?",a:"Hollandsk topliga – Ajax Amsterdam er mest ikonisk med CL-triumfer i 1971, 72, 73 og 1995"},
+  {c:"Europæiske ligaer",q:"Hvad er den portugisiske liga hedder officielt?",a:"Primeira Liga (eller Liga Portugal)"},
+  {c:"Europæiske ligaer",q:"Hvem har vundet Europa League flest gange?",a:"Sevilla FC – 7 gange"},
+  {c:"Europæiske ligaer",q:"Hvad er 'Derby d'Italia' i Serie A?",a:"Juventus vs. Inter Milan"},
+  {c:"Europæiske ligaer",q:"Hvem var topscorer i Bundesligaen sæsonen 2022/23?",a:"Harry Kane – 36 mål for Bayern München"},
+  {c:"Europæiske ligaer",q:"Hvad er 'Scudetto' i italiensk fodbold?",a:"Den lille skjold der pryder trøjen hos den regerende italienske mester"},
+  {c:"Europæiske ligaer",q:"Hvad er 'Rekordmeister' i Bundesligaen og hvem er det?",a:"Tilnavn til klubben med flest tyske mesterskaber – Bayern München"},
+  {c:"Europæiske ligaer",q:"Hvad er Conference League og hvornår blev det introduceret?",a:"UEFA's tredje europæiske klub-turnering – introduceret i sæsonen 2021/22"},
+  {c:"Europæiske ligaer",q:"Hvad er 'Der Klassiker' i tysk fodbold?",a:"Borussia Dortmund vs. Bayern München"},
+  {c:"Europæiske ligaer",q:"Hvad er forskellen på UEFA Conference League og Europa League?",a:"EL: næst-øverste europæiske niveau. UECL: tredje niveau – lavere rangerede klubber og mere åbent felt"},
+  {c:"Europæiske ligaer",q:"Hvad er Ligue 1's mest dominerende klub de seneste 10 år?",a:"Paris Saint-Germain (PSG)"},
+  {c:"Europæiske ligaer",q:"Hvem vandt den historisk første udgave af Europa League (tidl. UEFA Cup)?",a:"Tottenham Hotspur (1972) – vandt den første UEFA Cup-finale"},
+  {c:"Europæiske ligaer",q:"Hvad er 'la Cantera' og 'La Masia' – og hvad har de til fælles?",a:"Real Madrids (La Cantera) og Barcelonas (La Masia) akademier – begge verdensberygtede ungdomsakademier"},
+  {c:"Europæiske ligaer",q:"Hvad er Ligue 1-rekorden for flest mål i en sæson?",a:"Carlos Bianchi – 37 mål (1977/78)"},
+  {c:"Europæiske ligaer",q:"Hvad er den vigtigste forskel på engelsk og spansk fodboldtradition?",a:"England: historisk 'kick-and-rush', direkte spil. Spanien: teknik, besiddelse og taktisk raffinement"},
+  // Ungdomsfodbold (15)
+  {c:"Ungdomsfodbold",q:"Hvad er den officielle kampstruktur for U15-fodbold i DBU's regi?",a:"11-mands fodbold på fuld bane"},
+  {c:"Ungdomsfodbold",q:"Hvad er DBU's anbefaling til fokus i U12-U15 alderen?",a:"Teknisk og taktisk grundlag, 'game-based learning' – vinderorientering nedtones"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'spillercentreret træning'?",a:"Tilgang hvor spilleren er i centrum – coachen stiller spørgsmål frem for at give svar"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'gate coaching' i fodboldtræning?",a:"Coaching der gives i pauser frem for at stoppe spil konstant – quickere feedback"},
+  {c:"Ungdomsfodbold",q:"Hvad er forskel på 'outcome goals' og 'process goals' i ungdomstræning?",a:"Outcome: vinderorienteret (sejr, resultat). Process: fokus på specifikke elementer (presning, boldkontrol)"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'autonomy support' i trænerkontekst?",a:"Træner støtter spillerens selvbestemmelse – giver valg, involverer spillere i beslutninger"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'psychological safety' i et holdmiljø?",a:"Spillere tør tage risici og lave fejl uden frygt for negative reaktioner fra træner eller holdkammerater"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'blocked practice' vs. 'variable practice'?",a:"Blocked: gentag én færdighed (hurtig fremgang, dårlig transfer). Variable: veksl (langsommere fremgang, bedre transfer til kamp)"},
+  {c:"Ungdomsfodbold",q:"Hvad er UEFA's C-Licens?",a:"Basiscoach-licens der giver ret til at træne ungdomshold op til et vist niveau"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'spilmodellen' i en dansk fodboldklub?",a:"En fælles beskrivelse af klubbens spillestil, principper og adfærd i de fire spillefaser – sikrer rød tråd i alle årgange"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'talent' i moderne sportsvidenskab?",a:"Multidimensionel størrelse – teknisk, fysisk, kognitiv, psykologisk og social kapacitet til at udvikle sig"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'early specialization' vs. 'early diversification'?",a:"Early spec.: tidlig fokus på én sport (risiko for udbrændthed). Early div.: mange sportsgrene tidligt (bedre motorisk bredde)"},
+  {c:"Ungdomsfodbold",q:"Hvad er 1v1-træningens primære formål i ungdomsfodbold?",a:"Udvikle mod, teknisk dygtighed og beslutningstagning i duel – grundlaget for individuelt spil"},
+  {c:"Ungdomsfodbold",q:"Hvad er 'coaching points' og hvordan bruges de effektivt?",a:"Specifikke fokuspunkter kommunikeret til spillere; effektivt: få og klare – max 1-2 per øvelse"},
+  {c:"Ungdomsfodbold",q:"Hvad er formålet med at anvende videoanalyse i ungdomstræning?",a:"Giver spillere konkret, visuel feedback på egne præstationer – understøtter refleksion og selvkorrigering"},
+  // Svær kategori (22)
+  {c:"Svær kategori",q:"Hvad er 'regista' i italiensk fodboldterminologi?",a:"Den dybe playmaker/dirigerende midtbanespiller – eksempel: Pirlo, Xabi Alonso"},
+  {c:"Svær kategori",q:"Hvad er 'mezzala' i fodbold?",a:"Midtbanespiller der løber ind i half-spaces – hybriden mellem en 8'er og en trequartista"},
+  {c:"Svær kategori",q:"Hvad er 'carrilero' i fodboldtaktik?",a:"Bred midtbanespiller der løber op og ned langs kanten og hjælper både angreb og forsvar"},
+  {c:"Svær kategori",q:"Hvad er 'the 3-2-5 formation' historisk set?",a:"Fodboldformationens 'urform' fra 1880'erne – 3 forsvarere, 2 midtbanespillere, 5 angribere"},
+  {c:"Svær kategori",q:"Hvad er 'pressing shadow' som taktisk begreb?",a:"Positionen en spiller tager for at skærme af for en afleveringsmulighed – presser indirekte"},
+  {c:"Svær kategori",q:"Hvad er 'volante' i sydamerikansk fodboldterminologi?",a:"Energisk defensiv midtbanespiller (box-to-box type) – stærk, løbestærk 6'er eller 8'er"},
+  {c:"Svær kategori",q:"I hvilken fodbold-periode skiftede holdet fra W-M formation til 4-2-4?",a:"1950'erne – Ungarn og Brasilien populariserede 4-2-4 som svar på WM-systemet"},
+  {c:"Svær kategori",q:"Hvad er 'Cruyff turn' og hvem opfandt den?",a:"En vendebevægelse hvor spilleren finter med skudbevægelse men trækker bolden bag standbenet – Johan Cruyff"},
+  {c:"Svær kategori",q:"Hvad er 'acute:chronic workload ratio' (ACWR)?",a:"Forholdet ml. aktuel uges belastning og seneste 4 ugers gennemsnit – ratio over 1.5 øger skaderisiko markant"},
+  {c:"Svær kategori",q:"Hvad er 'positional superiority' i Guardiolas spillemodel?",a:"At besætte og udnytte numerisk, positionel og kvalitativ overlegenhed i specifikke banezoner"},
+  {c:"Svær kategori",q:"Hvad er 'the pressing trap' som taktisk virkemiddel?",a:"Provokere modstanderen ind i en zone og derefter knibtage med koordineret pres – modstanderen lokkes i en fælde"},
+  {c:"Svær kategori",q:"Hvad er 'set-piece coaching' bidraget til moderne topfodbold?",a:"Dødbolde bidrager med ca. 25-30% af alle scoringer på topniveau – nu en specialistdisciplin"},
+  {c:"Svær kategori",q:"Hvad er 'the diamond midfield' og dets primære fordele og ulemper?",a:"Fire midtbanespillere i diamantform – dominerer centrum, men er sårbar på kanterne"},
+  {c:"Svær kategori",q:"Hvad er 'plyometrisk træning' og hvad er dens formål?",a:"Eksplosive øvelser (hop, spring) der udnytter stræk-afkortningscyklus – forbedrer sprintstart og hoppekraft"},
+  {c:"Svær kategori",q:"Hvad er FIFA's krav til baglinjens minimumslængde?",a:"Minimum 45 meter (50 yards)"},
+  {c:"Svær kategori",q:"Hvad er 'DOGSO' og hvad straffes det med?",a:"Denial of an Obvious Goal-Scoring Opportunity – typisk rødt kort (kan reduceres til gult kort i visse situationer)"},
+  {c:"Svær kategori",q:"Hvad er 'biomechanical overload' i fodboldskadesforebyggelse?",a:"Når belastning på væv overstiger kapaciteten – opstår ved pludselig forøgelse af træningsvolumen eller intensitet"},
+  {c:"Svær kategori",q:"Hvad er 'ATP-testing' i fodboldkontekst?",a:"Athletic Performance Testing – systematisk måling af sprint, styrke og aerob kapacitet til at overvåge udvikling"},
+  {c:"Svær kategori",q:"Hvad er 'handball-reglen' ændret til i de seneste år?",a:"Intentionel eller unaturlig arm over skulderhøjde giver straffespark – selv uden intention i visse tilfælde"},
+  {c:"Svær kategori",q:"Hvad er en 'professional foul' og hvad er straffen?",a:"Bevidst forseelse for at stoppe en åbenlys målchance – typisk rødt kort (DOGSO)"},
+  {c:"Svær kategori",q:"Hvad er 'transition pressing' som hybrid-taktik?",a:"Kombinerer pressing med hurtig overgang – holdet presser i sekunder efter boldtab OG presser ved modstanderens opbygning"},
+  {c:"Svær kategori",q:"Hvad er forskellen på 'gegenpressing' og 'low block'?",a:"Gegenpressing: aggressiv genpresning umiddelbart efter boldtab. Low block: passiv, dyb forsvarslinje der venter på modstanderen"},
+];
+
+// ── Helpers ──
+function h(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function el(id){return document.getElementById(id);}
+
+// ── State ──
+// G.rounds[] = array of round objects {order:[], qi:0, completed:false}
+// G.currentRound = 0,1,2
+// G.scores = [] cumulative across rounds
+let G={mode:'live',nTeams:2,teams:[],scores:[],rounds:[],currentRound:0,
+       readerIdx:0,answererIdx:1,snapshots:{},usedGlobal:[]};
+let pending=null;
+
+// ── Persistence ──
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({G,pending}));}catch(e){}}
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return false;
+    const s=JSON.parse(raw);
+    if(!s||!s.G||!s.G.teams)return false;
+    G=s.G;
+    if(!G.usedGlobal)G.usedGlobal=[];
+    if(!G.rounds)G.rounds=[];
+    if(G.currentRound===undefined)G.currentRound=0;
+    pending=s.pending||null;
+    return true;
+  }catch(e){return false;}
+}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+
+// ── Calculate round size: floor(~100/3) trimmed to multiple of nTeams ──
+function calcRoundSize(nTeams){
+  const perGame=Math.floor(100/TOTAL_ROUNDS); // ~33
+  return Math.floor(perGame/nTeams)*nTeams;
+}
+
+function buildGameOrders(nTeams, usedGlobal){
+  const used=new Set(usedGlobal||[]);
+  const available=shuffle(QS.map((_,i)=>i).filter(i=>!used.has(i)));
+  const rSize=calcRoundSize(nTeams);
+  const rounds=[];
+  for(let r=0;r<TOTAL_ROUNDS;r++){
+    const slice=available.splice(0,rSize);
+    if(slice.length<nTeams) break; // not enough questions
+    rounds.push({order:slice,qi:0,completed:false});
+  }
+  return rounds;
+}
+
+// ── Setup UI ──
+let setupMode='live',setupNTeams=2;
+function setMode(m){
+  setupMode=m;
+  el('mode-live').classList.toggle('active',m==='live');
+  el('mode-test').classList.toggle('active',m==='test');
+  el('start-live').style.display=m==='live'?'block':'none';
+  el('start-test').style.display=m==='test'?'block':'none';
+  el('mode-note').textContent=m==='live'
+    ?'Et hold læser op, et andet svarer. 3 runder = ca. 100 spørgsmål.'
+    :'Præcis som live – svar er sløret. Brug til at lære quizzen at kende inden busturen.';
+  updateQsInfo();
+}
+function setN(n){
+  setupNTeams=n;
+  document.querySelectorAll('#num-btns .num-btn').forEach((b,i)=>b.classList.toggle('active',i===n-2));
+  renderInputs();updateQsInfo();
+}
+function updateQsInfo(){
+  const used=(G.usedGlobal||[]).length;
+  const available=QS.length-used;
+  const rSize=calcRoundSize(setupNTeams);
+  const gamesLeft=Math.floor(available/(rSize*TOTAL_ROUNDS));
+  const qs=rSize*TOTAL_ROUNDS;
+  el('qs-info').textContent=
+    QS.length+' spørgsmål i alt · '+used+' brugt · '+available+' tilbage\n'+
+    'Et spil: '+TOTAL_ROUNDS+' runder á '+rSize+' spørgsmål = '+qs+' spørgsmål · '+gamesLeft+' fulde spil mulige';
+}
+function renderInputs(){
+  const c=el('team-inputs');c.innerHTML='';
+  for(let i=0;i<setupNTeams;i++){
+    const row=document.createElement('div');row.className='team-row';
+    const inp=document.createElement('input');
+    inp.type='text';inp.placeholder='Hold '+(i+1);inp.id='ti'+i;
+    row.appendChild(inp);c.appendChild(row);
+  }
+}
+function resumeGame(){
+  el('setup-screen').style.display='none';
+  // Figure out if we're mid-round or between rounds
+  const cr=G.rounds[G.currentRound];
+  if(cr&&!cr.completed&&cr.qi<cr.order.length){
+    el('game-screen').style.display='flex';
+    updateModeInd();renderSB();loadQ();
+  } else {
+    // between rounds
+    showBetween(false);
+  }
+}
+function discardSave(){
+  const used=G.usedGlobal||[];
+  G={mode:'live',nTeams:2,teams:[],scores:[],rounds:[],currentRound:0,
+     readerIdx:0,answererIdx:1,snapshots:{},usedGlobal:used};
+  pending=null;save();
+  el('resume-banner').style.display='none';
+  setupNTeams=2;setupMode='live';setMode('live');setN(2);
+}
+function startGame(m){
+  const teams=[],scores=[];
+  for(let i=0;i<setupNTeams;i++){
+    const v=(el('ti'+i).value||'').trim()||'Hold '+(i+1);
+    teams.push(v);scores.push(0);
+  }
+  const used=G.usedGlobal||[];
+  const rounds=buildGameOrders(setupNTeams,used);
+  if(rounds.length===0){alert('Ikke nok ubrugte spørgsmål til et nyt spil. Tryk "Nulstil alt" for at starte forfra.');return;}
+  G={mode:m,nTeams:setupNTeams,teams,scores,rounds,currentRound:0,
+     readerIdx:0,answererIdx:1%setupNTeams,snapshots:{},usedGlobal:used};
+  pending=null;save();
+  el('setup-screen').style.display='none';
+  el('game-screen').style.display='flex';
+  updateModeInd();renderSB();loadQ();
+}
+function updateModeInd(){
+  const mi=el('mind');
+  mi.textContent=G.mode==='test'?'Testmode':'Live';
+  mi.className='mode-ind '+(G.mode==='test'?'test':'live');
+}
+
+// ── Nav ──
+function goSetup(){el('game-screen').style.display='none';el('between-screen').style.display='none';showSetup();}
+function resetAll(){
+  if(!confirm('Nulstil ALT – inkl. brugte spørgsmål?'))return;
+  clearSave();pending=null;
+  G={mode:'live',nTeams:2,teams:[],scores:[],rounds:[],currentRound:0,readerIdx:0,answererIdx:1,snapshots:{},usedGlobal:[]};
+  ['game-screen','between-screen','end-screen'].forEach(id=>el(id).style.display='none');
+  setupNTeams=2;setupMode='live';setMode('live');setN(2);showSetup();
+}
+function showSetup(){
+  setupNTeams=G.nTeams||2;setupMode=G.mode||'live';
+  document.querySelectorAll('#num-btns .num-btn').forEach((b,i)=>b.classList.toggle('active',i===setupNTeams-2));
+  setMode(setupMode);renderInputs();
+  if(G.teams)G.teams.forEach((t,i)=>{const inp=el('ti'+i);if(inp)inp.value=t;});
+  const cr=G.rounds&&G.rounds[G.currentRound];
+  const inProgress=cr&&(cr.qi>0||G.currentRound>0);
+  el('resume-banner').style.display=inProgress?'flex':'none';
+  if(inProgress){
+    const rnd=G.currentRound+1;
+    const qi=cr?cr.qi:0;
+    const total=cr?cr.order.length:0;
+    el('resume-text').innerHTML=
+      'Spil i gang: runde <strong>'+rnd+'/'+TOTAL_ROUNDS+'</strong>, spørgsmål <strong>'+(qi+1)+'/'+total+'</strong><br>'+
+      (G.teams||[]).map((t,i)=>'<strong>'+h(t)+'</strong>: '+G.scores[i]+' pt').join(' · ');
+  }
+  updateQsInfo();
+  el('setup-screen').style.display='flex';
+}
+
+// ── Round bar ──
+function updateRoundBar(){
+  const rnd=G.currentRound;
+  const cr=G.rounds[rnd];
+  const qi=cr?cr.qi:0;
+  const total=cr?cr.order.length:1;
+  el('round-label').textContent='Runde '+(rnd+1)+' af '+TOTAL_ROUNDS;
+  const dots=el('round-dots');dots.innerHTML='';
+  for(let i=0;i<TOTAL_ROUNDS;i++){
+    const d=document.createElement('div');d.className='rd';
+    if(i<rnd||(G.rounds[i]&&G.rounds[i].completed))d.classList.add('done');
+    else if(i===rnd)d.classList.add('active');
+    dots.appendChild(d);
+  }
+  el('progress-fill').style.width=Math.round((qi/total)*100)+'%';
+}
+
+// ── Scoreboard ──
+function renderSB(){
+  const sb=el('sb');sb.innerHTML='';
+  G.teams.forEach((t,i)=>{
+    const d=document.createElement('div');
+    let cls='sc';
+    if(i===G.readerIdx)cls+=' reader';
+    else if(i===G.answererIdx)cls+=' answerer';
+    d.className=cls;d.id='sc'+i;
+    const rt=i===G.readerIdx?'Læser':i===G.answererIdx?'Svarer':'';
+    d.innerHTML='<div class="sn">'+h(t)+'</div><div class="sp" id="sp'+i+'">'+G.scores[i]+'</div><div class="role-tag">'+rt+'</div>';
+    sb.appendChild(d);
+  });
+}
+function updSB(){
+  G.teams.forEach((_,i)=>{
+    const sp=el('sp'+i);if(sp)sp.textContent=G.scores[i];
+    const sc=el('sc'+i);if(!sc)return;
+    let cls='sc';
+    if(i===G.readerIdx)cls+=' reader';
+    else if(i===G.answererIdx)cls+=' answerer';
+    sc.className=cls;
+    const rt=sc.querySelector('.role-tag');
+    if(rt)rt.textContent=i===G.readerIdx?'Læser':i===G.answererIdx?'Svarer':'';
+  });
+}
+
+// ── Load question ──
+function loadQ(){
+  const cr=G.rounds[G.currentRound];
+  if(!cr||cr.qi>=cr.order.length){endRound();return;}
+  const snapKey=G.currentRound+'_'+cr.qi;
+  if(!G.snapshots[snapKey]){
+    G.snapshots[snapKey]={readerIdx:G.readerIdx,answererIdx:G.answererIdx,scores:[...G.scores]};save();
+  }
+  const q=QS[cr.order[cr.qi]];
+  el('qc').textContent='Spørgsmål '+(cr.qi+1)+' / '+cr.order.length;
+  el('cb').textContent=q.c;
+  el('qt').textContent=q.q;
+  el('roles-line').innerHTML=
+    '<span class="rl-badge reader-b">📖 Læser: '+h(G.teams[G.readerIdx])+'</span>'+
+    ' <span class="rl-badge ans-b">💬 Svarer: '+h(G.teams[G.answererIdx])+'</span>';
+  el('rbtn').style.display='flex';
+  el('ans-inner').style.display='none';
+  el('at').style.display='none';
+  el('blur-row').style.display='none';
+  el('ss').style.display='none';
+  el('awarded-bar').style.display='none';
+  el('nb').style.display='none';
+  el('at').textContent=q.a;
+  el('ba').textContent=q.a;
+  el('ba').classList.remove('show');
+  el('pk').textContent='Vis svar';
+  el('nb').className='next-btn '+(G.mode==='test'?'test-c':'live-c');
+  el('nb').textContent=(cr.qi===cr.order.length-1)?'Afslut runde →':'Næste spørgsmål →';
+  el('prev-btn').style.display=(cr.qi>0||G.currentRound>0)?'block':'none';
+  if(pending)applyPendingToUI();
+  updSB();buildSG();updateModeInd();updateRoundBar();
+}
+
+// ── Answer ──
+function revealAns(){
+  el('rbtn').style.display='none';
+  el('ans-inner').style.display='block';
+  if(G.mode==='test'){el('blur-row').style.display='flex';}
+  else{el('at').style.display='block';}
+  el('ss').style.display='flex';
+}
+function peekAns(){
+  const b=el('ba'),btn=el('pk');
+  if(b.classList.contains('show')){b.classList.remove('show');btn.textContent='Vis svar';}
+  else{b.classList.add('show');btn.textContent='Skjul svar';}
+}
+
+// ── Score grid ──
+function buildSG(){
+  const sg=el('sg');sg.innerHTML='';el('reader-note').textContent='';
+  G.teams.forEach((t,i)=>{
+    if(i===G.readerIdx){
+      const row=document.createElement('div');row.className='score-row';
+      const lbl=document.createElement('div');lbl.className='tlbl is-reader';lbl.textContent='📖 '+t+' (læser)';
+      row.appendChild(lbl);sg.appendChild(row);return;
+    }
+    const row=document.createElement('div');row.className='score-row';
+    const lbl=document.createElement('div');lbl.className='tlbl';lbl.textContent=t;row.appendChild(lbl);
+    if(i===G.answererIdx){
+      const b2=document.createElement('button');b2.className='pb p2';b2.id='btn-'+i+'-2';b2.textContent='+2 pt';b2.onclick=()=>give(i,2);
+      const b0=document.createElement('button');b0.className='pb p0';b0.id='btn-'+i+'-0';b0.textContent='Forkert';b0.onclick=()=>give(i,0);
+      row.appendChild(b2);row.appendChild(b0);
+    } else {
+      const b1=document.createElement('button');b1.className='pb p1';b1.id='btn-'+i+'-1';b1.textContent='+1 pt';b1.onclick=()=>give(i,1);
+      row.appendChild(b1);
+    }
+    sg.appendChild(row);
+  });
+  el('reader-note').textContent=G.teams[G.readerIdx]+' er læser denne runde – ingen point til dem.';
+}
+function give(teamIdx,pts){
+  if(pending)G.scores[pending.teamIdx]-=pending.pts;
+  pending={teamIdx,pts};G.scores[teamIdx]+=pts;
+  updSB();save();applyPendingToUI();
+}
+function applyPendingToUI(){
+  if(!pending)return;
+  const {teamIdx,pts}=pending;
+  el('aw-txt').innerHTML='✓ Tildelt: <strong>'+(pts===0?'Forkert – 0 point':'+'+pts+' point til '+h(G.teams[teamIdx]))+'</strong>';
+  el('awarded-bar').style.display='flex';el('nb').style.display='block';
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('selected'));
+  const btnId=pts===2?'btn-'+teamIdx+'-2':pts===0?'btn-'+teamIdx+'-0':'btn-'+teamIdx+'-1';
+  const sel=el(btnId);if(sel)sel.classList.add('selected');
+}
+function undoPoints(){
+  if(!pending)return;
+  G.scores[pending.teamIdx]-=pending.pts;pending=null;
+  updSB();save();
+  el('awarded-bar').style.display='none';el('nb').style.display='none';
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('selected'));
+}
+
+// ── Next / Prev ──
+function nextQ(){
+  const cr=G.rounds[G.currentRound];
+  // Mark question as used globally
+  if(!G.usedGlobal)G.usedGlobal=[];
+  const qIdx=cr.order[cr.qi];
+  if(!G.usedGlobal.includes(qIdx))G.usedGlobal.push(qIdx);
+  G.readerIdx=(G.readerIdx+1)%G.nTeams;
+  G.answererIdx=(G.answererIdx+1)%G.nTeams;
+  pending=null;
+  const snapKey=G.currentRound+'_'+(cr.qi+1);G.snapshots[snapKey]=null;
+  cr.qi++;
+  save();loadQ();
+}
+function prevQ(){
+  const cr=G.rounds[G.currentRound];
+  if(pending){G.scores[pending.teamIdx]-=pending.pts;pending=null;}
+  // Un-mark as used
+  if(cr.qi>0){
+    const qIdx=cr.order[cr.qi-1];
+    if(G.usedGlobal){const idx=G.usedGlobal.indexOf(qIdx);if(idx>-1)G.usedGlobal.splice(idx,1);}
+    cr.qi--;
+    const snapKey=G.currentRound+'_'+cr.qi;
+    const snap=G.snapshots[snapKey];
+    if(snap){G.readerIdx=snap.readerIdx;G.answererIdx=snap.answererIdx;G.scores=[...snap.scores];}
+  } else if(G.currentRound>0) {
+    // Go back to previous round's last question
+    G.currentRound--;
+    const pr=G.rounds[G.currentRound];
+    pr.completed=false;
+    pr.qi=pr.order.length-1;
+    const snapKey=G.currentRound+'_'+pr.qi;
+    const snap=G.snapshots[snapKey];
+    if(snap){G.readerIdx=snap.readerIdx;G.answererIdx=snap.answererIdx;G.scores=[...snap.scores];}
+  }
+  save();loadQ();
+}
+
+// ── End of round ──
+function endRound(){
+  const cr=G.rounds[G.currentRound];
+  cr.completed=true;save();
+  if(G.currentRound>=G.rounds.length-1){showEnd();}
+  else{showBetween(true);}
+}
+
+// ── Between rounds screen ──
+function showBetween(justFinished){
+  el('game-screen').style.display='none';
+  el('between-screen').style.display='flex';
+  const doneRound=G.currentRound+(justFinished?1:0);
+  el('between-title').textContent='Runde '+doneRound+' færdig!';
+  // dots
+  const dots=el('between-dots');dots.innerHTML='';
+  for(let i=0;i<TOTAL_ROUNDS;i++){
+    const d=document.createElement('div');d.className='brd';
+    if(i<doneRound)d.classList.add('done');
+    else if(i===doneRound)d.classList.add('next');
+    dots.appendChild(d);
+  }
+  el('between-info').textContent='Næste runde starter med friske spørgsmål. Point fortsætter.';
+  // scores
+  const bs=el('between-scores');bs.innerHTML='';
+  const sorted=[...G.teams.map((t,i)=>({t,s:G.scores[i]}))].sort((a,b)=>b.s-a.s);
+  sorted.forEach((item,idx)=>{
+    const r=document.createElement('div');r.className='bfr'+(idx===0?' leader':'');
+    r.innerHTML='<span class="bfn">'+(idx===0?'🥇 ':idx===1?'🥈 ':idx===2?'🥉 ':'')+h(item.t)+'</span><span class="bfp">'+item.s+' pt</span>';
+    bs.appendChild(r);
+  });
+  const nextRnd=doneRound+1;
+  el('next-round-num').textContent=nextRnd;
+  el('next-round-btn').textContent='Start runde '+nextRnd+' →';
+}
+function startNextRound(){
+  G.currentRound++;
+  pending=null;save();
+  el('between-screen').style.display='none';
+  el('game-screen').style.display='flex';
+  updateModeInd();renderSB();loadQ();
+}
+
+// ── New game (same teams, new questions) ──
+function startNewGame(){
+  const used=G.usedGlobal||[];
+  const rounds=buildGameOrders(G.nTeams,used);
+  if(rounds.length===0){alert('Ikke nok ubrugte spørgsmål til et nyt spil. Tryk "Nulstil alt" for at starte forfra.');return;}
+  G={mode:G.mode,nTeams:G.nTeams,teams:G.teams,
+     scores:G.teams.map(()=>0), // reset scores for new game
+     rounds,currentRound:0,readerIdx:G.readerIdx,answererIdx:G.answererIdx,
+     snapshots:{},usedGlobal:used};
+  pending=null;save();
+  el('end-screen').style.display='none';
+  el('game-screen').style.display='flex';
+  updateModeInd();renderSB();loadQ();
+}
+
+// ── End ──
+function showEnd(){
+  el('game-screen').style.display='none';
+  el('between-screen').style.display='none';
+  el('end-screen').style.display='flex';
+  const sorted=G.teams.map((t,i)=>({t,s:G.scores[i]})).sort((a,b)=>b.s-a.s);
+  const fs=el('fs');fs.innerHTML='';
+  sorted.forEach((item,idx)=>{
+    const r=document.createElement('div');r.className='fr'+(idx===0?' win':'');
+    r.innerHTML='<span class="fn">'+(idx===0?'🥇 ':idx===1?'🥈 ':idx===2?'🥉 ':'')+h(item.t)+'</span><span class="fp">'+item.s+' pt</span>';
+    fs.appendChild(r);
+  });
+  const used=(G.usedGlobal||[]).length;
+  const remaining=QS.length-used;
+  const rSize=calcRoundSize(G.nTeams);
+  const gamesLeft=Math.floor(remaining/(rSize*TOTAL_ROUNDS));
+  const info=document.createElement('p');
+  info.style.cssText='font-size:.8rem;color:#8aab96;font-style:italic;margin-top:.5rem;';
+  info.textContent=remaining+' spørgsmål tilbage · '+gamesLeft+' fulde spil mere mulige';
+  fs.after(info);
+  save();
+}
+
+// ── Boot ──
+(function boot(){
+  const hasSave=load();
+  if(hasSave&&G.teams&&G.teams.length>0&&G.rounds&&G.rounds.length>0){
+    const cr=G.rounds[G.currentRound];
+    const inProgress=cr&&(cr.qi>0||G.currentRound>0);
+    if(inProgress){
+      setupNTeams=G.nTeams;setupMode=G.mode;
+      document.querySelectorAll('#num-btns .num-btn').forEach((b,i)=>b.classList.toggle('active',i===setupNTeams-2));
+      setMode(setupMode);renderInputs();
+      if(G.teams)G.teams.forEach((t,i)=>{const inp=el('ti'+i);if(inp)inp.value=t;});
+      const rnd=G.currentRound+1;
+      const qi=cr?cr.qi:0;const total=cr?cr.order.length:0;
+      el('resume-banner').style.display='flex';
+      el('resume-text').innerHTML=
+        'Spil i gang: runde <strong>'+rnd+'/'+TOTAL_ROUNDS+'</strong>, sp. <strong>'+(qi+1)+'/'+total+'</strong><br>'+
+        (G.teams||[]).map((t,i)=>'<strong>'+h(t)+'</strong>: '+G.scores[i]+' pt').join(' · ');
+      updateQsInfo();
+      el('setup-screen').style.display='flex';
+      return;
+    }
+  }
+  if(!hasSave)G={mode:'live',nTeams:2,teams:[],scores:[],rounds:[],currentRound:0,readerIdx:0,answererIdx:1,snapshots:{},usedGlobal:[]};
+  setupNTeams=G.nTeams||2;setupMode=G.mode||'live';
+  document.querySelectorAll('#num-btns .num-btn').forEach((b,i)=>b.classList.toggle('active',i===setupNTeams-2));
+  setMode(setupMode);setN(setupNTeams);
+  updateQsInfo();
+  el('setup-screen').style.display='flex';
+})();
+</script>
+</body>
+</html>
